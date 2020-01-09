@@ -4,13 +4,16 @@ class API::V1::Users::GamesController < ApplicationController
   end
 
   def show
-    render json: set_game, serializer: Game::ShowSerializer, status: 200
+    render json: set_game, serializer: User::Game::ShowSerializer, status: 200
   end
 
-  def new
-    game = set_user.games.new(create_params)
+  def create
+    game = set_user.games.new(rows: params[:game][:rows],
+                              cols: params[:game][:rows],
+                              mines: params[:game][:mines]
+                              )
     if game.save
-      render json: game, serializer: Game::ShowSerializer, status: 200
+      render json: game, serializer: User::Game::ShowSerializer, status: 200
     else
       render json: { errors: Game.errors }, status: 422
     end
@@ -19,7 +22,7 @@ class API::V1::Users::GamesController < ApplicationController
   def update
     game = set_game
     if game.update_attributes(update_params)
-      render json: game, serializer: Game::ShowSerializer, status: 200
+      render json: game, serializer: User::Game::ShowSerializer, status: 200
     else
       render json: { errors: Game.errors }, status: 422
     end
@@ -35,7 +38,7 @@ private
   end
 
   def create_params
-    params.permit(:user_id, :rows, :cols, :mines)
+    params.permit(:user_id, game: [ :mines, :rows, :cols ])
   end
 
   def update_params
